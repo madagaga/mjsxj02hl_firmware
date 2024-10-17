@@ -13,19 +13,20 @@ FIRMWARE_FILE   := demo_hlc6.bin
 CROSS_COMPILE   := arm-himix100-linux
 CCFLAGS         := -march=armv7-a -mfpu=neon-vfpv4 -funsafe-math-optimizations
 LDPATH          := /opt/hisi-linux/x86-arm/arm-himix100-linux/target/usr/app/lib
+REPOSITORY      := https://github.com/kasitoru
 
 .SILENT:
 all: mkdirs install-libs application web curl chmod pack
 
 application:
-	git clone --recurse-submodules --branch "$(BRANCH)" "https://github.com/kasitoru/mjsxj02hl_application" "$(TEMPORARY_DIR)/application"
+	git clone --recurse-submodules --branch "$(BRANCH)" "$(REPOSITORY)/mjsxj02hl_application" "$(TEMPORARY_DIR)/application"
 	make -C "$(TEMPORARY_DIR)/application" CROSS_COMPILE="$(CROSS_COMPILE)-" CCFLAGS="$(CCFLAGS)" LDPATH="$(LDPATH)"
 	cp -f $(TEMPORARY_DIR)/application/bin/mjsxj02hl $(FIRMWARE_DIR)/app/bin
 	cp -f $(TEMPORARY_DIR)/application/bin/ipctool $(FIRMWARE_DIR)/rootfs/bin
 	cp -rf $(TEMPORARY_DIR)/application/lib/. $(FIRMWARE_DIR)/app/lib
 
 web:
-	git clone --branch "$(BRANCH)" "https://github.com/kasitoru/mjsxj02hl_web" "$(TEMPORARY_DIR)/web"
+	git clone --branch "$(BRANCH)" "$(REPOSITORY)/mjsxj02hl_web" "$(TEMPORARY_DIR)/web"
 	make -C "$(TEMPORARY_DIR)/web" CROSS_COMPILE="$(CROSS_COMPILE)-" CCFLAGS="$(CCFLAGS)"
 	cp -rf $(TEMPORARY_DIR)/web/bin/. $(FIRMWARE_DIR)/app/bin
 	cp -rf $(TEMPORARY_DIR)/web/lib/. $(FIRMWARE_DIR)/app/lib
