@@ -4,7 +4,7 @@ echo
 echo "============================="
 echo " MJXSJ02HL CUSTOM FIRMWARE"
 echo -n " VERSION: "
-cat /usr/app/share/.version
+cat /backk/share/.version
 echo " AUTHOR: Kasito"
 echo " HOMEPAGE: https://kasito.ru"
 echo "============================="
@@ -33,15 +33,15 @@ fi
 # Copy mjsxj02hl.conf from sd-card
 if [ -f /mnt/mmc/mjsxj02hl.conf ]; then
 	echo "Copy mjsxj02hl.conf from sd-card..."
-	cp -f /mnt/mmc/mjsxj02hl.conf $(readlink /usr/app/share/mjsxj02hl.conf)
-	chmod 644 /usr/app/share/mjsxj02hl.conf
+	cp -f /mnt/mmc/mjsxj02hl.conf /configs/mjsxj02hl.conf
+	chmod 644 /configs/mjsxj02hl.conf
 fi
 
 # Create empty configuration file if it is missing
-if [ ! -f /usr/app/share/mjsxj02hl.conf ]; then
+if [ ! -f /configs/mjsxj02hl.conf ]; then
 	echo "Create empty configuration file..."
-	touch /usr/app/share/mjsxj02hl.conf
-	chmod 644 /usr/app/share/mjsxj02hl.conf
+	touch /configs/mjsxj02hl.conf
+	chmod 644 /configs/mjsxj02hl.conf
 fi
 
 # Create default run.sh file if it is missing
@@ -76,7 +76,7 @@ ntpd -p pool.ntp.org
 
 # WEB server
 echo "Starting WEB server..."
-httpd -p 80 -h /usr/app/www
+httpd -p 80 -h /backk/www
 
 # Telnet server (root:toor)
 echo "Starting Telnet server..."

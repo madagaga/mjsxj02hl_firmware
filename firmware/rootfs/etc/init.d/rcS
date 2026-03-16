@@ -42,12 +42,10 @@ mkdir /mnt/mmc
 mount /dev/mmcblk0p1 /mnt/mmc
 
 # Set environment variables
-echo "LD_LIBRARY_PATH=/lib:/usr/lib:/usr/app/lib"
-LD_LIBRARY_PATH=/lib:/usr/lib:/usr/app/lib
-echo "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/app/bin:/usr/app/sbin"
-PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/app/bin:/usr/app/sbin
-echo "export LD_LIBRARY_PATH=/thirdlib:$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH=/thirdlib:$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=/lib:/usr/app/lib:/backk/lib
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/app/bin:/backk/bin
+echo "PATH=$PATH"
 echo "export LD_LIBRARY_PATH PATH"
 export LD_LIBRARY_PATH PATH
 
@@ -76,6 +74,6 @@ echo "ifconfig lo up"
 ifconfig lo up
 
 # Init application
-echo "/usr/app/bin/init_app.sh"
-/usr/app/bin/init_app.sh
+echo "/backk/bin/init_app.sh"
+/backk/bin/init_app.sh
 
