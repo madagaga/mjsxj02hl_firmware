@@ -42,7 +42,7 @@ mkdir /mnt/mmc
 mount /dev/mmcblk0p1 /mnt/mmc
 
 # Set environment variables
-LD_LIBRARY_PATH=/lib:/usr/app/lib:/backk/lib
+LD_LIBRARY_PATH=/lib:/thirdlib:/usr/app/lib:/backk/lib
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/app/bin:/backk/bin
 echo "PATH=$PATH"
