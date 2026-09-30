@@ -1,5 +1,5 @@
-APP_BRANCH      := big-clean
-WEB_BRANCH      := main
+APP_BRANCH      := dev
+WEB_BRANCH      := rewrite/spa-json-api
 
 ZLIB_VERSION    := 1.3.1
 OPENSSL_VERSION := 1.1.1w
@@ -17,18 +17,18 @@ LDPATH          := /opt/hisi-linux/x86-arm/arm-himix100-linux/target/usr/app/lib
 REPOSITORY      := https://github.com/madagaga
 
 .SILENT:
-all: mkdirs install-libs application web curl chmod pack
+all: mkdirs install-libs application web curl strip chmod pack
 
 application:
 	git clone --recurse-submodules --branch "$(APP_BRANCH)" "$(REPOSITORY)/mjsxj02hl_application" "$(TEMPORARY_DIR)/application"
-	make -C "$(TEMPORARY_DIR)/application" CROSS_COMPILE="$(CROSS_COMPILE)-" CCFLAGS="$(CCFLAGS)" LDPATH="$(LDPATH)"
+	make -C "$(TEMPORARY_DIR)/application" CROSS_COMPILE="$(CROSS_COMPILE)-" LDPATH="$(LDPATH)"
 	cp -f $(TEMPORARY_DIR)/application/bin/mjsxj02hl $(FIRMWARE_DIR)/app/bin
 	cp -f $(TEMPORARY_DIR)/application/bin/ipctool $(FIRMWARE_DIR)/rootfs/bin
 	cp -rf $(TEMPORARY_DIR)/application/lib/. $(FIRMWARE_DIR)/app/lib
 
 web:
 	git clone --branch "$(WEB_BRANCH)" "$(REPOSITORY)/mjsxj02hl_web" "$(TEMPORARY_DIR)/web"
-	make -C "$(TEMPORARY_DIR)/web" CROSS_COMPILE="$(CROSS_COMPILE)-" CCFLAGS="$(CCFLAGS)"
+	make -C "$(TEMPORARY_DIR)/web" CROSS_COMPILE="$(CROSS_COMPILE)-"
 	cp -rf $(TEMPORARY_DIR)/web/bin/. $(FIRMWARE_DIR)/app/bin
 	cp -rf $(TEMPORARY_DIR)/web/lib/. $(FIRMWARE_DIR)/app/lib
 	cp -rf $(TEMPORARY_DIR)/web/share/. $(FIRMWARE_DIR)/app/share
@@ -59,6 +59,11 @@ curl: zlib openssl
 	cp -f $(TEMPORARY_DIR)/curl/src/.libs/curl $(FIRMWARE_DIR)/rootfs/bin
 	ln -fs ../../bin/curl $(FIRMWARE_DIR)/rootfs/usr/bin/curl
 	cp -fP $(TEMPORARY_DIR)/curl/lib/.libs/libcurl.so* $(FIRMWARE_DIR)/rootfs/thirdlib
+
+strip:
+	# only what we build (stock Hisi libs are left untouched)
+	$(CROSS_COMPILE)-strip --strip-all $(FIRMWARE_DIR)/app/bin/mjsxj02hl $(FIRMWARE_DIR)/app/bin/lua $(FIRMWARE_DIR)/rootfs/bin/ipctool $(FIRMWARE_DIR)/rootfs/bin/curl
+	find $(FIRMWARE_DIR)/app/lib/lua $(FIRMWARE_DIR)/rootfs/thirdlib -type f -name "*.so*" -exec $(CROSS_COMPILE)-strip --strip-unneeded {} \;
 
 chmod:
 	# all
