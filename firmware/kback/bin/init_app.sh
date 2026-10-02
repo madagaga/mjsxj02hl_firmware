@@ -10,6 +10,20 @@ echo " HOMEPAGE: https://kasito.ru"
 echo "============================="
 echo
 
+# Firmware update result (U-Boot SD update triggered via 0x120F0048)
+FW_REG=$(devmem 0x120f0048 32)
+case "$FW_REG" in
+	0x00000002) FW_STATUS="ok" ;;
+	0x00000001) FW_STATUS="failed" ;;
+	*)          FW_STATUS="" ;;
+esac
+if [ -n "$FW_STATUS" ]; then
+	echo "Firmware update: $FW_STATUS"
+	echo "$FW_STATUS" > /tmp/fw_update_status
+	rm -f /mnt/mmc/demo_hlc6.bin
+	devmem 0x120f0048 32 0
+fi
+
 # Set default password for root
 if [ ! -f /etc/passwd ]; then
 	echo "Set default password for root user..."

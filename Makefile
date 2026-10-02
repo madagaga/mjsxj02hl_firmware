@@ -1,4 +1,5 @@
-BRANCH          := main
+APP_BRANCH      := dev
+WEB_BRANCH      := rewrite/spa-json-api
 
 ZLIB_VERSION    := 1.3.2
 OPENSSL_VERSION := 3.6.2
@@ -13,27 +14,28 @@ FIRMWARE_FILE   := demo_hlc6.bin
 CROSS_COMPILE   := arm-himix100-linux
 CCFLAGS         := -march=armv7-a -mfpu=neon-vfpv4 -funsafe-math-optimizations -Os
 LDPATH          := /opt/hisi-linux/x86-arm/arm-himix100-linux/target/usr/app/lib
+REPOSITORY      := https://github.com/madagaga
 
-ifeq ("$(BRANCH)", "main")
+ifeq ("$(APP_BRANCH)", "main")
     FIRMWARE_VERB = $(FIRMWARE_VER)
 else
-    FIRMWARE_VERB = $(FIRMWARE_VER)-$(BRANCH)
+    FIRMWARE_VERB = $(FIRMWARE_VER)-$(APP_BRANCH)
 endif
 
 .SILENT:
 all: mkdirs install-libs application web curl strip chmod pack
 
 application:
-	git clone --recurse-submodules --branch "$(BRANCH)" "https://github.com/kasitoru/mjsxj02hl_application" "$(TEMPORARY_DIR)/application"
-	make -C "$(TEMPORARY_DIR)/application" CROSS_COMPILE="$(CROSS_COMPILE)-" CCFLAGS="$(CCFLAGS)" LDPATH="$(LDPATH)"
+	git clone --recurse-submodules --branch "$(APP_BRANCH)" "$(REPOSITORY)/mjsxj02hl_application" "$(TEMPORARY_DIR)/application"
+	make -C "$(TEMPORARY_DIR)/application" CROSS_COMPILE="$(CROSS_COMPILE)-" LDPATH="$(LDPATH)"
 	cp -f $(TEMPORARY_DIR)/application/bin/mjsxj02hl $(FIRMWARE_DIR)/kback/bin
 	cp -f $(TEMPORARY_DIR)/application/bin/ipctool $(FIRMWARE_DIR)/kback/bin
 	cp -rf $(TEMPORARY_DIR)/application/lib/. $(FIRMWARE_DIR)/kback/lib
 	
 
 web:
-	git clone --branch "$(BRANCH)" "https://github.com/kasitoru/mjsxj02hl_web" "$(TEMPORARY_DIR)/web"
-	make -C "$(TEMPORARY_DIR)/web" CROSS_COMPILE="$(CROSS_COMPILE)-" CCFLAGS="$(CCFLAGS)"
+	git clone --branch "$(WEB_BRANCH)" "$(REPOSITORY)/mjsxj02hl_web" "$(TEMPORARY_DIR)/web"
+	make -C "$(TEMPORARY_DIR)/web" CROSS_COMPILE="$(CROSS_COMPILE)-"
 	cp -rf $(TEMPORARY_DIR)/web/bin/. $(FIRMWARE_DIR)/kback/bin
 	cp -rf $(TEMPORARY_DIR)/web/lib/. $(FIRMWARE_DIR)/kback/lib
 	cp -rf $(TEMPORARY_DIR)/web/share/. $(FIRMWARE_DIR)/kback/share
