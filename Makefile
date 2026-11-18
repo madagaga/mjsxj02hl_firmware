@@ -1,5 +1,5 @@
 APP_BRANCH      := dev
-WEB_BRANCH      := rewrite/spa-json-api
+WEB_BRANCH      := dev
 
 ZLIB_VERSION    := 1.3.2
 OPENSSL_VERSION := 3.6.2
