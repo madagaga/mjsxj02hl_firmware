@@ -98,10 +98,13 @@ conf_set() {
 # Command line of a process (words separated by one space, trailing space).
 cmdline() { tr '\0' ' ' < "/proc/$1/cmdline"; } 2>/dev/null
 
-# PIDs of processes whose command line matches the given shell glob pattern.
+# PIDs of processes whose command line matches the glob pattern $1. $2 is a
+# plain word every match contains: one grep pre-selects the candidates, which
+# avoids forking once per process (slow on this camera).
 find_cmd() {
-	for d in /proc/[0-9]*; do
-		pid=${d#/proc/}
+	for f in $(grep -al "$2" /proc/[0-9]*/cmdline 2>/dev/null); do
+		pid=${f#/proc/}
+		pid=${pid%/cmdline}
 		[ "$pid" = "$$" ] && continue
 		case "$(cmdline "$pid")" in
 			$1) echo "$pid" ;;
@@ -112,7 +115,7 @@ find_cmd() {
 # Same, but only the listening daemon: connection handlers are forked children
 # with the same command line, their parent is a process matching the pattern.
 find_listener() {
-	for pid in $(find_cmd "$1"); do
+	for pid in $(find_cmd "$1" "$2"); do
 		ppid=$(sed -n 's/^PPid:[[:space:]]*//p' "/proc/$pid/status" 2>/dev/null)
 		case "$(cmdline "$ppid")" in
 			$1) ;;
@@ -121,9 +124,9 @@ find_listener() {
 	done
 }
 
-telnet_pids() { find_listener "telnetd -p $PORT_TELNET *"; }
-ftp_pids()    { find_cmd "tcpsvd -vE 0.0.0.0 $PORT_FTP ftpd *"; }
-ssh_pids()    { find_listener "*dropbear -r $SSH_KEY -p $PORT_SSH *"; }
+telnet_pids() { find_listener "telnetd -p $PORT_TELNET *" telnetd; }
+ftp_pids()    { find_cmd "tcpsvd -vE 0.0.0.0 $PORT_FTP ftpd *" tcpsvd; }
+ssh_pids()    { find_listener "*dropbear -r $SSH_KEY -p $PORT_SSH *" dropbear; }
 is_available() {
 	case "$1" in
 		ftp)    command -v tcpsvd >/dev/null 2>&1 && command -v ftpd >/dev/null 2>&1 ;;
