@@ -92,13 +92,10 @@ ntpd -p pool.ntp.org
 echo "Starting WEB server..."
 httpd -p 80 -h /backk/www
 
-# Telnet server (root:toor)
-echo "Starting Telnet server..."
-telnetd
-
-# FTP server (root:toor)
-echo "Starting FTP server..."
-tcpsvd -vE 0.0.0.0 21 ftpd -w / &
+# Remote access services: FTP, Telnet, SSH (root:toor)
+# Which ones start is stored in /configs/services.conf (see services.sh)
+echo "Starting remote access services..."
+services.sh apply
 
 # Main application
 echo "Starting main application..."

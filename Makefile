@@ -4,6 +4,7 @@ WEB_BRANCH      := rewrite/spa-json-api
 ZLIB_VERSION    := 1.3.2
 OPENSSL_VERSION := 3.6.2
 CURL_VERSION    := 8.19.0
+DROPBEAR_VERSION := 2026.94
 
 TEMPORARY_DIR   := temp
 
@@ -23,7 +24,7 @@ else
 endif
 
 .SILENT:
-all: mkdirs install-libs application web curl strip chmod pack
+all: mkdirs install-libs application web curl dropbear strip chmod pack
 
 application:
 	git clone --recurse-submodules --branch "$(APP_BRANCH)" "$(REPOSITORY)/mjsxj02hl_application" "$(TEMPORARY_DIR)/application"
@@ -65,6 +66,15 @@ curl: zlib openssl
 	make -C "$(TEMPORARY_DIR)/curl" CURL_LDFLAGS_LIB="-Wl,-rpath-link $(CURDIR)/$(TEMPORARY_DIR)/openssl"
 	cp -f $(TEMPORARY_DIR)/curl/src/.libs/curl $(FIRMWARE_DIR)/kback/bin
 	cp -fP $(TEMPORARY_DIR)/curl/lib/.libs/libcurl.so* $(FIRMWARE_DIR)/kback/lib
+
+dropbear:
+	wget -O "$(TEMPORARY_DIR)/dropbear-$(DROPBEAR_VERSION).tar.bz2" "https://matt.ucc.asn.au/dropbear/dropbear-$(DROPBEAR_VERSION).tar.bz2"
+	tar -xf $(TEMPORARY_DIR)/dropbear-$(DROPBEAR_VERSION).tar.bz2 -C $(TEMPORARY_DIR) && mv $(TEMPORARY_DIR)/dropbear-$(DROPBEAR_VERSION) $(TEMPORARY_DIR)/dropbear
+	cp -f dropbear_opts/localoptions.h $(TEMPORARY_DIR)/dropbear/localoptions.h
+	cd $(TEMPORARY_DIR)/dropbear && ./configure --host="$(CROSS_COMPILE)" CC="$(CROSS_COMPILE)-gcc" CFLAGS="$(CCFLAGS)" --enable-static --enable-bundled-libtom --disable-zlib --disable-pam --disable-lastlog --disable-utmp --disable-wtmp --disable-utmpx --disable-wtmpx --disable-pututline --disable-pututxline --disable-loginfunc
+	make -C "$(TEMPORARY_DIR)/dropbear" PROGRAMS="dropbear dropbearkey scp" MULTI=1 STATIC=1
+	cp -f $(TEMPORARY_DIR)/dropbear/dropbearmulti $(FIRMWARE_DIR)/kback/bin
+	cd $(FIRMWARE_DIR)/kback/bin && ln -sf dropbearmulti dropbear && ln -sf dropbearmulti dropbearkey && ln -sf dropbearmulti scp
 
 strip:
 	find $(FIRMWARE_DIR)/kback/lib -type f -name "*.so*" -exec $(CROSS_COMPILE)-strip --strip-unneeded {} \;
@@ -111,6 +121,7 @@ clean:
 	-make -C "$(TEMPORARY_DIR)/zlib" clean
 	-make -C "$(TEMPORARY_DIR)/openssl" clean
 	-make -C "$(TEMPORARY_DIR)/curl" clean
+	-make -C "$(TEMPORARY_DIR)/dropbear" clean
 	-rm -rf $(TEMPORARY_DIR)/*
 	-rm -f $(FIRMWARE_FILE)
 
